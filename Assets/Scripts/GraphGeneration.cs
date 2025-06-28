@@ -34,7 +34,7 @@ public class GraphGeneration : MonoBehaviour
 
     private void Start()
     {
-        DOTween.To(() => weierstrassInnerCoeff, x => weierstrassInnerCoeff = x, 18f, 5f).SetLoops(-1, LoopType.Yoyo);
+        DOTween.To(() => weierstrassInnerCoeff, x => weierstrassInnerCoeff = x, 10f, 2f).SetLoops(-1, LoopType.Yoyo);
     }
 
     private void Update()
