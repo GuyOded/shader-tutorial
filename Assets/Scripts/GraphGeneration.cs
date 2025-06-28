@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Calculations;
+using DG.Tweening;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -18,6 +19,7 @@ public class GraphGeneration : MonoBehaviour
 
     private List<GraphPointEncapsulator> graphPointArray;
     private int currentIterations;
+    private float weierstrassInnerCoeff;
 
     private void Awake()
     {
@@ -28,6 +30,11 @@ public class GraphGeneration : MonoBehaviour
         }
 
         currentIterations = weierstrassIterations;
+    }
+
+    private void Start()
+    {
+        DOTween.To(() => weierstrassInnerCoeff, x => weierstrassInnerCoeff = x, 18f, 5f).SetLoops(-1, LoopType.Yoyo);
     }
 
     private void Update()
@@ -47,6 +54,8 @@ public class GraphGeneration : MonoBehaviour
             currentIterations = weierstrassIterations;
             UpdateIterations();
         }
+
+        RecalculatePositions();
     }
 
     private void InstantiateGraphPoints()
@@ -79,6 +88,15 @@ public class GraphGeneration : MonoBehaviour
         {
             graphPointArray[i].VisualPoint.SetActive(false);
         }
+    }
+
+    private void RecalculatePositions()
+    {
+        graphPointArray.ForEach(gpe =>
+        {
+            gpe.GraphPoint = new float2(gpe.GraphPoint.x, MathematicalFunctions.Weierstrass(gpe.GraphPoint.x, weierstrassIterations, b: weierstrassInnerCoeff));
+            gpe.VisualPoint.transform.localPosition = new Vector3(gpe.GraphPoint.x, gpe.GraphPoint.y, 0);
+        });
     }
 
     private void UpdateScale()
