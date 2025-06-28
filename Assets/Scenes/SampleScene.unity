@@ -436,6 +436,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1772186481}
   - component: {fileID: 1772186482}
+  - component: {fileID: 1772186483}
   m_Layer: 0
   m_Name: Graph
   m_TagString: Untagged
@@ -470,10 +471,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e57df20ae1da34142b2f03ced8e4b56d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  resolution: 10
+  resolution: 800
   parent: {fileID: 0}
   pointPrefab: {fileID: 7723781802180304425, guid: b7f03baa38129404ea9f305ae843521b, type: 3}
   scale: 0.1
+--- !u!114 &1772186483
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1772186480}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 97abbb644c3dc24418f320b1939c05b6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  selectedFunction: 0
+  graphGenerator: {fileID: 1772186482}
+  freq1: 2.85
+  freq2: 2.6
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

@@ -12,15 +12,20 @@ namespace Calculations
 
     public static class MathematicalFunctions
     {
-        public static float Weierstrass(float x, int iterations = 10, float a = .3f, float b = 8f)
+        public static float Weierstrass(float x, int iterations = 10, float a = .3f, float b = 8f, float phase = 0)
         {
             float sum = 0;
             for (int i = 0; i < iterations; i++)
             {
-                sum += Mathf.Pow(a, i) * Mathf.Cos(Mathf.Pow(b, i) * Mathf.PI * x);
+                sum += Mathf.Pow(a, i) * Mathf.Cos(Mathf.Pow(b, i) * Mathf.PI * x + phase);
             }
 
             return sum;
+        }
+
+        public static float Beat(float x, float f1, float f2, float phase)
+        {
+            return 0.5f * (Mathf.Cos(2 * Mathf.PI * f1 * x + phase) + Mathf.Cos(2 * Mathf.PI * f2 * x + phase));
         }
 
         public static float[] Linspace(float min, float max, int pointsCount)

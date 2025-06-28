@@ -1,7 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Calculations;
-using DG.Tweening;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -11,15 +11,14 @@ public class GraphGeneration : MonoBehaviour
     [SerializeField] private int resolution = 10;
     [SerializeField] private Transform parent;
     [SerializeField] private GameObject pointPrefab;
-    [SerializeField, Range(1, 20)] private int weierstrassIterations = 10;
 
     [Header("Graph Point Props")]
     [Range(0.001f, 1)]
     [SerializeField] private float scale = 0.1f;
 
     private List<GraphPointEncapsulator> graphPointArray;
-    private int currentIterations;
-    private float weierstrassInnerCoeff;
+
+    private Func<float, float, float> currentFunction = (x, t) => MathematicalFunctions.Weierstrass(x, phase: t);
 
     private void Awake()
     {
@@ -28,13 +27,6 @@ public class GraphGeneration : MonoBehaviour
         {
             parent = transform;
         }
-
-        currentIterations = weierstrassIterations;
-    }
-
-    private void Start()
-    {
-        DOTween.To(() => weierstrassInnerCoeff, x => weierstrassInnerCoeff = x, 10f, 2f).SetLoops(-1, LoopType.Yoyo);
     }
 
     private void Update()
@@ -49,13 +41,12 @@ public class GraphGeneration : MonoBehaviour
             UpdateScale();
         }
 
-        if (currentIterations != weierstrassIterations)
-        {
-            currentIterations = weierstrassIterations;
-            UpdateIterations();
-        }
-
         RecalculatePositions();
+    }
+
+    public void SetFunction(Func<float, float, float> func)
+    {
+        currentFunction = func;
     }
 
     private void InstantiateGraphPoints()
@@ -65,14 +56,16 @@ public class GraphGeneration : MonoBehaviour
 
         for (int i = 0; i < samples.Length; i++)
         {
+            float x = samples[i] + Time.deltaTime;
+
             if (i <= currentlyVisualizedPoints - 1)
             {
-                graphPointArray[i].GraphPoint = new float2(samples[i], MathematicalFunctions.Weierstrass(samples[i], weierstrassIterations));
+                graphPointArray[i].GraphPoint = new float2(x, currentFunction(x, Time.time));
                 graphPointArray[i].VisualPoint.transform.localPosition = new Vector3(graphPointArray[i].GraphPoint.x, graphPointArray[i].GraphPoint.y, 0);
             }
             else
             {
-                float2 newGraphPoint = new(samples[i], MathematicalFunctions.Weierstrass(samples[i], weierstrassIterations));
+                float2 newGraphPoint = new(x, currentFunction(x, Time.time));
                 GameObject newVisualPoint = Instantiate(pointPrefab, parent);
                 newVisualPoint.transform.localPosition = new Vector3(newGraphPoint.x, newGraphPoint.y);
                 GraphPointEncapsulator gpe = new(newGraphPoint, newVisualPoint);
@@ -94,9 +87,22 @@ public class GraphGeneration : MonoBehaviour
     {
         graphPointArray.ForEach(gpe =>
         {
-            gpe.GraphPoint = new float2(gpe.GraphPoint.x, MathematicalFunctions.Weierstrass(gpe.GraphPoint.x, weierstrassIterations, b: weierstrassInnerCoeff));
+            float x = gpe.GraphPoint.x;
+
+            gpe.GraphPoint = new float2(x, currentFunction(x, Time.time));
             gpe.VisualPoint.transform.localPosition = new Vector3(gpe.GraphPoint.x, gpe.GraphPoint.y, 0);
         });
+    }
+
+    private float GetRangeClampedX(float x)
+    {
+        if (x > 2)
+        {
+            x = (x + 2) % (Consts.DEFAULT_RANGE.y - Consts.DEFAULT_RANGE.x);
+            x -= Consts.DEFAULT_RANGE.y;
+        }
+
+        return x;
     }
 
     private void UpdateScale()
@@ -104,15 +110,6 @@ public class GraphGeneration : MonoBehaviour
         graphPointArray.ForEach(gpe =>
         {
             gpe.VisualPoint.transform.localScale = Vector3.one * scale;
-        });
-    }
-
-    private void UpdateIterations()
-    {
-        graphPointArray.ForEach(gpe =>
-        {
-            gpe.GraphPoint = new float2(gpe.GraphPoint.x, MathematicalFunctions.Weierstrass(gpe.GraphPoint.x, weierstrassIterations));
-            gpe.VisualPoint.transform.localPosition = new Vector3(gpe.GraphPoint.x, gpe.GraphPoint.y);
         });
     }
 
