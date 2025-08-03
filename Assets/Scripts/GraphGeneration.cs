@@ -60,12 +60,12 @@ public class GraphGeneration : MonoBehaviour
 
             if (i <= currentlyVisualizedPoints - 1)
             {
-                graphPointArray[i].GraphPoint = new float2(x, currentFunction(x, Time.time));
+                graphPointArray[i].GraphPoint = new float3(x, currentFunction(x, Time.time), 0);
                 graphPointArray[i].VisualPoint.transform.localPosition = new Vector3(graphPointArray[i].GraphPoint.x, graphPointArray[i].GraphPoint.y, 0);
             }
             else
             {
-                float2 newGraphPoint = new(x, currentFunction(x, Time.time));
+                float3 newGraphPoint = new(x, currentFunction(x, Time.time), 0);
                 GameObject newVisualPoint = Instantiate(pointPrefab, parent);
                 newVisualPoint.transform.localPosition = new Vector3(newGraphPoint.x, newGraphPoint.y);
                 GraphPointEncapsulator gpe = new(newGraphPoint, newVisualPoint);
@@ -83,13 +83,25 @@ public class GraphGeneration : MonoBehaviour
         }
     }
 
+    private void Instantiate3DGraphPoints()
+    {
+        int lengthResolution = Mathf.RoundToInt(Mathf.Sqrt(resolution));
+        Vector2[] range = MathematicalFunctions.Linspace2D(Consts.DEFAULT_RANGE.x, Consts.DEFAULT_RANGE.y, Consts.DEFAULT_RANGE.x, Consts.DEFAULT_RANGE.y, lengthResolution);
+
+        int rangeCount = range.Length;
+        int currentlyVisualizedPointsCount = graphPointArray.Count;
+
+        range.Zip(graphPointArray);
+
+    }
+
     private void RecalculatePositions()
     {
         graphPointArray.ForEach(gpe =>
         {
             float x = gpe.GraphPoint.x;
 
-            gpe.GraphPoint = new float2(x, currentFunction(x, Time.time));
+            gpe.GraphPoint = new float3(x, currentFunction(x, Time.time), 0);
             gpe.VisualPoint.transform.localPosition = new Vector3(gpe.GraphPoint.x, gpe.GraphPoint.y, 0);
         });
     }
@@ -115,7 +127,7 @@ public class GraphGeneration : MonoBehaviour
 
     private class GraphPointEncapsulator
     {
-        public GraphPointEncapsulator(float2 point, GameObject visualPoint)
+        public GraphPointEncapsulator(float3 point, GameObject visualPoint)
         {
             VisualPoint = visualPoint;
             GraphPoint = point;
@@ -127,7 +139,7 @@ public class GraphGeneration : MonoBehaviour
             private set;
         }
 
-        public float2 GraphPoint
+        public float3 GraphPoint
         {
             get; set;
         }

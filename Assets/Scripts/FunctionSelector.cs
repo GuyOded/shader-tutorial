@@ -59,6 +59,7 @@ public class FunctionSelector : MonoBehaviour
     private enum FunctionEnumeration
     {
         Weierstrass,
-        Beat
+        Beat,
+        Ripple
     }
 }
