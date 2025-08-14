@@ -44,13 +44,18 @@ namespace Calculations
             IEnumerable<float> xRange = Enumerable.Range(0, length).Select(i => xMin + i * (xMax - xMin) / length);
             IEnumerable<float> yRange = Enumerable.Range(0, length).Select(i => yMin + i * (yMax - yMin) / length);
 
-            return xRange.Zip(yRange, (x, y) => new Vector2(x, y)).ToArray();
+            return xRange.SelectMany(y => yRange, (x, y) => new Vector2(x, y)).ToArray();
         }
 
-        public static float TwoDimensionalRipple(float x, float y, float phase, float distanceClamp = .1f)
+        public static float TwoDimensionalRipple(float x, float y, float phase, float distanceClamp = .1f, float frequenecy = 1)
         {
             float distance = Mathf.Sqrt(x * x + y * y);
-            return Mathf.Sin(distance + phase) / (distance + distanceClamp);
+            return Mathf.Sin(frequenecy * distance + phase) / (distance + distanceClamp);
+        }
+
+        public static float CirclingDecayingExponents(float x, float y, float phase, float decayConstant, float frequency)
+        {
+            return 1;
         }
     }
 }

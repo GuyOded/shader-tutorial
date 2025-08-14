@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Calculations;
 using UnityEngine;
 
@@ -11,6 +12,13 @@ public class FunctionSelector : MonoBehaviour
     // Beat config
     [SerializeField] private float freq1 = 2.85f;
     [SerializeField] private float freq2 = 2.5f;
+
+    private static readonly Dictionary<FunctionEnumeration, FunctionType> functionToTypeMap = new()
+    {
+        {FunctionEnumeration.Beat, FunctionType.TwoDScalar},
+        {FunctionEnumeration.Weierstrass, FunctionType.TwoDScalar},
+        {FunctionEnumeration.Ripple, FunctionType.ThreeDScalar},
+    };
 
     private FunctionEnumeration currentFunction = FunctionEnumeration.Weierstrass;
 
@@ -46,20 +54,35 @@ public class FunctionSelector : MonoBehaviour
 
     private void UpdateFunction()
     {
-        Func<float, float, float> f = currentFunction switch
+        if (functionToTypeMap[currentFunction] == FunctionType.TwoDScalar)
         {
-            FunctionEnumeration.Beat => (x, t) => MathematicalFunctions.Beat(x, freq1, freq2, t),
-            FunctionEnumeration.Weierstrass => (x, t) => MathematicalFunctions.Weierstrass(x, phase: t),
-            _ => (x, t) => MathematicalFunctions.Weierstrass(x, phase: t)
-        };
+            Func<float, float, float> f = currentFunction switch
+            {
+                FunctionEnumeration.Beat => (x, t) => MathematicalFunctions.Beat(x, freq1, freq2, t),
+                FunctionEnumeration.Weierstrass => (x, t) => MathematicalFunctions.Weierstrass(x, phase: t),
+                _ => (x, t) => MathematicalFunctions.Weierstrass(x, phase: t)
+            };
+            graphGenerator.Current2dFunction = f;
+            graphGenerator.CurrentType = FunctionType.TwoDScalar;
+        }
+        else if (functionToTypeMap[currentFunction] == FunctionType.ThreeDScalar)
+        {
+            graphGenerator.Current3dFunction = (x, y, time) => MathematicalFunctions.TwoDimensionalRipple(x, y, time, 0.5f, freq1);
+            graphGenerator.CurrentType = FunctionType.ThreeDScalar;
+        }
 
-        graphGenerator.SetFunction(f);
     }
 
     private enum FunctionEnumeration
     {
         Weierstrass,
         Beat,
-        Ripple
+        Ripple,
     }
+}
+
+public enum FunctionType
+{
+    TwoDScalar,
+    ThreeDScalar,
 }
