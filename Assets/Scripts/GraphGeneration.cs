@@ -53,6 +53,8 @@ public class GraphGeneration : MonoBehaviour
                 Instantiate2DGraphPoints();
             else if (currentType == FunctionType.ThreeDScalar)
                 Instantiate3DGraphPoints();
+
+            functionTypeChanged = false;
         }
 
         if (graphPointArray.Count > 0 && graphPointArray.First().VisualPoint.transform.localScale.x != scale)
@@ -119,7 +121,9 @@ public class GraphGeneration : MonoBehaviour
                 Vector3 visualPointPosition = new(graphPoint.x, graphPoint.z, graphPoint.y);
                 GameObject newVisualPoint = Instantiate(pointPrefab, parent);
                 newVisualPoint.transform.localPosition = visualPointPosition;
+                newVisualPoint.transform.localScale = Vector3.one * scale;
                 GraphPointEncapsulator graphPointEncapsulator = new(graphPoint, newVisualPoint);
+                graphPointArray.Add(graphPointEncapsulator);
             }
         }
         else if (graphPointArray.Count > range.Length)
