@@ -53,9 +53,21 @@ namespace Calculations
             return Mathf.Sin(frequenecy * distance + phase) / (distance + distanceClamp);
         }
 
-        public static float CirclingDecayingExponents(float x, float y, float phase, float decayConstant, float frequency)
+        public static float CirclingDecayingGaussians(float x, float y, float phase, float decayConstant = 1)
         {
-            return 1;
+            float2 firstCenter = new(Mathf.Sin(phase), Mathf.Cos(phase));
+            float2 secondCenter = new(Mathf.Sin(phase + Mathf.PI), Mathf.Cos(phase + Mathf.PI));
+
+            float2 evaluationPoint = new(x, y);
+            float firstExponent = -decayConstant * Square2D(evaluationPoint - firstCenter);
+            float secondExponent = -decayConstant * Square2D(evaluationPoint - secondCenter);
+
+            return Mathf.Exp(firstExponent) + Mathf.Exp(secondExponent);
+        }
+
+        private static float Square2D(float2 vector)
+        {
+            return vector.x * vector.x + vector.y * vector.y;
         }
     }
 }

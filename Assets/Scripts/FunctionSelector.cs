@@ -1,12 +1,17 @@
 using System;
 using System.Collections.Generic;
+using System.Xml.Serialization;
 using Calculations;
+using Unity.Collections;
 using UnityEngine;
 
 public class FunctionSelector : MonoBehaviour
 {
     [SerializeField] private FunctionEnumeration selectedFunction;
     [SerializeField] private GraphGeneration graphGenerator;
+    [SerializeField] private Camera mainCamera;
+    [SerializeField] private Transform threeDViewPoint;
+    [SerializeField] private Transform twoDViewPoint;
 
     // Function configuration
     // Beat config
@@ -18,6 +23,7 @@ public class FunctionSelector : MonoBehaviour
         {FunctionEnumeration.Beat, FunctionType.TwoDScalar},
         {FunctionEnumeration.Weierstrass, FunctionType.TwoDScalar},
         {FunctionEnumeration.Ripple, FunctionType.ThreeDScalar},
+        {FunctionEnumeration.CirclingDecayingExponents, FunctionType.ThreeDScalar}
     };
 
     private FunctionEnumeration currentFunction = FunctionEnumeration.Weierstrass;
@@ -36,6 +42,7 @@ public class FunctionSelector : MonoBehaviour
         if (selectedFunction != currentFunction)
         {
             currentFunction = selectedFunction;
+            UpdateCameraViewPoint();
             UpdateFunction();
         }
 
@@ -67,10 +74,32 @@ public class FunctionSelector : MonoBehaviour
         }
         else if (functionToTypeMap[currentFunction] == FunctionType.ThreeDScalar)
         {
-            graphGenerator.Current3dFunction = (x, y, time) => MathematicalFunctions.TwoDimensionalRipple(x, y, time, 0.5f, freq1);
+            Func<float, float, float, float> f = currentFunction switch
+            {
+                FunctionEnumeration.Ripple => (x, y, time) => MathematicalFunctions.TwoDimensionalRipple(x, y, time, 0.5f, freq1),
+                FunctionEnumeration.CirclingDecayingExponents => (x, y, time) => MathematicalFunctions.CirclingDecayingGaussians(x, y, time, 4),
+                _ => (x, y, time) => MathematicalFunctions.TwoDimensionalRipple(x, y, time, 0.5f, freq1)
+            };
+
+            graphGenerator.Current3dFunction = f;
             graphGenerator.CurrentType = FunctionType.ThreeDScalar;
         }
 
+    }
+
+    private void UpdateCameraViewPoint()
+    {
+        switch (functionToTypeMap[currentFunction])
+        {
+            case FunctionType.ThreeDScalar:
+                mainCamera.transform.position = threeDViewPoint.position;
+                mainCamera.transform.rotation = threeDViewPoint.rotation;
+                break;
+            case FunctionType.TwoDScalar:
+                mainCamera.transform.position = twoDViewPoint.position;
+                mainCamera.transform.rotation = twoDViewPoint.rotation;
+                break;
+        }
     }
 
     private enum FunctionEnumeration
@@ -78,6 +107,7 @@ public class FunctionSelector : MonoBehaviour
         Weierstrass,
         Beat,
         Ripple,
+        CirclingDecayingExponents,
     }
 }
 
