@@ -39,12 +39,12 @@ namespace Calculations
             return Enumerable.Range(0, pointsCount).Select(index => min + (max - min) / pointsCount * index).ToArray();
         }
 
-        public static Vector2[] Linspace2D(float xMin, float xMax, float yMin, float yMax, int length)
+        public static float2[] Linspace2D(float xMin, float xMax, float yMin, float yMax, int length)
         {
             IEnumerable<float> xRange = Enumerable.Range(0, length).Select(i => xMin + i * (xMax - xMin) / length);
             IEnumerable<float> yRange = Enumerable.Range(0, length).Select(i => yMin + i * (yMax - yMin) / length);
 
-            return xRange.SelectMany(y => yRange, (x, y) => new Vector2(x, y)).ToArray();
+            return xRange.SelectMany(y => yRange, (x, y) => new float2(x, y)).ToArray();
         }
 
         public static float TwoDimensionalRipple(float x, float y, float phase, float distanceClamp = .1f, float frequenecy = 1)

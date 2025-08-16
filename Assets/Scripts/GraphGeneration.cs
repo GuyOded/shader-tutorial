@@ -25,7 +25,9 @@ public class GraphGeneration : MonoBehaviour
 
     public Func<float, float, float> Current2dFunction { get => current2DFunction; set => current2DFunction = value; }
     public Func<float, float, float, float> Current3dFunction { get => current3DFunction; set => current3DFunction = value; }
-    public FunctionType CurrentType { get => currentType;
+    public FunctionType CurrentType
+    {
+        get => currentType;
         set
         {
             if (value != currentType)
@@ -52,7 +54,7 @@ public class GraphGeneration : MonoBehaviour
             if (currentType == FunctionType.TwoDScalar)
                 Instantiate2DGraphPoints();
             else if (currentType == FunctionType.ThreeDScalar)
-                Instantiate3DGraphPoints();
+                Instantiate3DScalarGraphPoints();
 
             functionTypeChanged = false;
         }
@@ -99,15 +101,24 @@ public class GraphGeneration : MonoBehaviour
         }
     }
 
-    private void Instantiate3DGraphPoints()
+    private void Instantiate3DScalarGraphPoints()
     {
         int lengthResolution = Mathf.RoundToInt(Mathf.Sqrt(resolution));
-        Vector2[] range = MathematicalFunctions.Linspace2D(Consts.DEFAULT_RANGE.x, Consts.DEFAULT_RANGE.y, Consts.DEFAULT_RANGE.x, Consts.DEFAULT_RANGE.y, lengthResolution);
+        float2[] range = MathematicalFunctions.Linspace2D(Consts.DEFAULT_RANGE.x,
+                                                        Consts.DEFAULT_RANGE.y,
+                                                        Consts.DEFAULT_RANGE.x,
+                                                        Consts.DEFAULT_RANGE.y,
+                                                        lengthResolution);
 
-        foreach ((Vector2 calculatedPoint, GraphPointEncapsulator graphPoint) in range.Zip(graphPointArray, (calculatedPoint, graphPoint) => (calculatedPoint, graphPoint)))
+        float3 current3DScalarGraphFunc(float x, float y) => new(x, current3DFunction(x, y, Time.time), y);
+        Instantiate3DGraphPoints(range, current3DScalarGraphFunc);
+    }
+
+    private void Instantiate3DGraphPoints(float2[] range, Func<float, float, float3> threeDGraphFunc)
+    {
+        foreach ((float2 domainPoint, GraphPointEncapsulator graphPoint) in range.Zip(graphPointArray, (calculatedPoint, graphPoint) => (calculatedPoint, graphPoint)))
         {
-            float currentValue = current3DFunction(calculatedPoint.x, calculatedPoint.y, Time.time);
-            graphPoint.GraphPoint = new float3(calculatedPoint.x, currentValue, calculatedPoint.y);
+            graphPoint.GraphPoint = threeDGraphFunc(domainPoint.x, domainPoint.y);
             graphPoint.VisualPoint.transform.localPosition = new Vector3(graphPoint.GraphPoint.x, graphPoint.GraphPoint.z, graphPoint.GraphPoint.y);
             graphPoint.VisualPoint.SetActive(true);
         }
@@ -116,8 +127,7 @@ public class GraphGeneration : MonoBehaviour
         {
             foreach (Vector2 domainPoint in range.Skip(graphPointArray.Count))
             {
-                float currentValue = current3DFunction(domainPoint.x, domainPoint.y, Time.time);
-                float3 graphPoint = new(domainPoint.x, currentValue, domainPoint.y);
+                float3 graphPoint = threeDGraphFunc(domainPoint.x, domainPoint.y);
                 Vector3 visualPointPosition = new(graphPoint.x, graphPoint.z, graphPoint.y);
                 GameObject newVisualPoint = Instantiate(pointPrefab, parent);
                 newVisualPoint.transform.localPosition = visualPointPosition;
@@ -151,17 +161,6 @@ public class GraphGeneration : MonoBehaviour
             }
             gpe.VisualPoint.transform.localPosition = new Vector3(gpe.GraphPoint.x, gpe.GraphPoint.y, gpe.GraphPoint.z);
         });
-    }
-
-    private float GetRangeClampedX(float x)
-    {
-        if (x > 2)
-        {
-            x = (x + 2) % (Consts.DEFAULT_RANGE.y - Consts.DEFAULT_RANGE.x);
-            x -= Consts.DEFAULT_RANGE.y;
-        }
-
-        return x;
     }
 
     private void UpdateScale()
