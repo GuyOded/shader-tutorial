@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Xml.Serialization;
 using Calculations;
+using Unity.Burst;
 using Unity.Collections;
+using Unity.Mathematics;
 using UnityEngine;
 
 public class FunctionSelector : MonoBehaviour
@@ -23,7 +25,8 @@ public class FunctionSelector : MonoBehaviour
         {FunctionEnumeration.Beat, FunctionType.TwoDScalar},
         {FunctionEnumeration.Weierstrass, FunctionType.TwoDScalar},
         {FunctionEnumeration.Ripple, FunctionType.ThreeDScalar},
-        {FunctionEnumeration.CirclingDecayingExponents, FunctionType.ThreeDScalar}
+        {FunctionEnumeration.CirclingDecayingExponents, FunctionType.ThreeDScalar},
+        {FunctionEnumeration.WavingSphere, FunctionType.ThreeDSurface},
     };
 
     private FunctionEnumeration currentFunction = FunctionEnumeration.Weierstrass;
@@ -84,6 +87,17 @@ public class FunctionSelector : MonoBehaviour
             graphGenerator.Current3dFunction = f;
             graphGenerator.CurrentType = FunctionType.ThreeDScalar;
         }
+        else if (functionToTypeMap[currentFunction] == FunctionType.ThreeDSurface)
+        {
+            Func<float, float, float, float3> f = currentFunction switch
+            {
+                FunctionEnumeration.WavingSphere => (x, y, time) => MathematicalFunctions.WavingSphere(x, y, time, Consts.DEFAULT_SPHERE_RADIUS),
+                _ => (x, y, time) => MathematicalFunctions.WavingSphere(x, y, time, Consts.DEFAULT_SPHERE_RADIUS)
+            };
+
+            graphGenerator.Current3dSurface = f;
+            graphGenerator.CurrentType = FunctionType.ThreeDSurface;
+        }
 
     }
 
@@ -92,6 +106,7 @@ public class FunctionSelector : MonoBehaviour
         switch (functionToTypeMap[currentFunction])
         {
             case FunctionType.ThreeDScalar:
+            case FunctionType.ThreeDSurface:
                 mainCamera.transform.position = threeDViewPoint.position;
                 mainCamera.transform.rotation = threeDViewPoint.rotation;
                 break;
@@ -108,6 +123,7 @@ public class FunctionSelector : MonoBehaviour
         Beat,
         Ripple,
         CirclingDecayingExponents,
+        WavingSphere,
     }
 }
 
@@ -115,4 +131,5 @@ public enum FunctionType
 {
     TwoDScalar,
     ThreeDScalar,
+    ThreeDSurface,
 }

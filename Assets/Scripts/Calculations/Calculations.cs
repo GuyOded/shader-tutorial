@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.IO.Compression;
 using System.Linq;
+using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -8,7 +10,10 @@ namespace Calculations
 {
     public static class Consts
     {
-        public static readonly float2 DEFAULT_RANGE = new float2(-2, 2);
+        public static readonly float2 DEFAULT_RANGE = new(-2, 2);
+        public static readonly float2 AZIMUTHAL_RANGE = new(-Mathf.PI, Mathf.PI);
+        public static readonly float2 ELEVATION_RANGE = new(-0.5f * Mathf.PI, 0.5f * Mathf.PI);
+        public static readonly float DEFAULT_SPHERE_RADIUS = 2;
     }
 
     public static class MathematicalFunctions
@@ -65,9 +70,45 @@ namespace Calculations
             return Mathf.Exp(firstExponent) + Mathf.Exp(secondExponent);
         }
 
+        public static float3 WavingSphere(float azimuth, float elevation, float phase, float radius, float amplitude = .05f, float frequenecy = 10f)
+        {
+            if (!InRange(azimuth, Consts.AZIMUTHAL_RANGE))
+            {
+                throw new ArgumentException($"{azimuth} not in range {Consts.AZIMUTHAL_RANGE}");
+            }
+
+            if (!InRange(elevation, Consts.ELEVATION_RANGE))
+            {
+                throw new ArgumentException($"{elevation} not in range {Consts.ELEVATION_RANGE}");
+            }
+
+            float oscilatedRadius = radius + amplitude * Mathf.Sin(phase + elevation * frequenecy);
+
+            float x = oscilatedRadius * Mathf.Sin(elevation) * Mathf.Cos(azimuth);
+            float y = oscilatedRadius * Mathf.Sin(elevation) * Mathf.Sin(azimuth);
+            float z = oscilatedRadius * Mathf.Cos(elevation);
+
+            return new float3(x, y, z);
+        }
+
+        public static float3 CartesianToSpherical(float3 cartesian)
+        {
+            float3 squared = cartesian * cartesian;
+            float r = Mathf.Sqrt(squared.x + squared.y + squared.z);
+            float azimuth = Mathf.Atan2(cartesian.z, cartesian.x);
+            float elevation = Mathf.Asin(cartesian.y / r);
+
+            return new(r, elevation, azimuth);
+        }
+
         private static float Square2D(float2 vector)
         {
             return vector.x * vector.x + vector.y * vector.y;
+        }
+
+        private static bool InRange(float value, float2 range)
+        {
+            return value <= range.y && value >= range.x;
         }
     }
 }
