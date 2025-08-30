@@ -18,6 +18,7 @@ public class GraphGeneration : MonoBehaviour
 
     private List<GraphPointEncapsulator> graphPointArray;
     private bool functionTypeChanged = false;
+    private int lastResolution = 0;
 
     private Func<float, float, float> current2DFunction = (x, t) => MathematicalFunctions.Weierstrass(x, phase: t);
     private Func<float, float, float, float> current3DFunction = (x, y, t) => MathematicalFunctions.TwoDimensionalRipple(x, y, t);
@@ -51,7 +52,7 @@ public class GraphGeneration : MonoBehaviour
 
     private void Update()
     {
-        if (graphPointArray.Count != resolution || functionTypeChanged)
+        if (lastResolution != resolution || functionTypeChanged)
         {
             if (currentType == FunctionType.TwoDScalar)
                 Instantiate2DGraphPoints();
@@ -61,6 +62,7 @@ public class GraphGeneration : MonoBehaviour
                 Instantiate3DSurfacePoints();
 
             functionTypeChanged = false;
+            lastResolution = resolution;
         }
 
         if (graphPointArray.Count > 0 && graphPointArray.First().VisualPoint.transform.localScale.x != scale)
@@ -132,7 +134,7 @@ public class GraphGeneration : MonoBehaviour
         var min = graphPointArray.Min(gpe => gpe.GraphPoint.y);
         var max = graphPointArray.Max(gpe => gpe.GraphPoint.y);
 
-        Debug.Log($"Min y: {min}, Max y: {max}");
+        // Debug.Log($"Min y: {min}, Max y: {max}");
     }
 
     private void Instantiate3DGraphPoints(float2[] range, Func<float, float, float3> threeDGraphFunc)
@@ -183,6 +185,7 @@ public class GraphGeneration : MonoBehaviour
             else if (currentType == FunctionType.ThreeDSurface)
             {
                 gpe.GraphPoint = current3DSurface(coordinate.z, coordinate.y, Time.time);
+                // gpe.GraphPoint = new float3(gpe.GraphPoint.x, gpe.GraphPoint.z, gpe.GraphPoint.y);
             }
             gpe.VisualPoint.transform.localPosition = new Vector3(gpe.GraphPoint.x, gpe.GraphPoint.y, gpe.GraphPoint.z);
         });

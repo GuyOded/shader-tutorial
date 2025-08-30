@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.IO.Compression;
 using System.Linq;
-using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -12,7 +10,7 @@ namespace Calculations
     {
         public static readonly float2 DEFAULT_RANGE = new(-2, 2);
         public static readonly float2 AZIMUTHAL_RANGE = new(-Mathf.PI, Mathf.PI);
-        public static readonly float2 ELEVATION_RANGE = new(-0.5f * Mathf.PI, 0.5f * Mathf.PI);
+        public static readonly float2 ELEVATION_RANGE = new(0, Mathf.PI);
         public static readonly float DEFAULT_SPHERE_RADIUS = 2;
     }
 
@@ -88,7 +86,7 @@ namespace Calculations
             float y = oscilatedRadius * Mathf.Sin(elevation) * Mathf.Sin(azimuth);
             float z = oscilatedRadius * Mathf.Cos(elevation);
 
-            return new float3(x, y, z);
+            return new float3(x, z, y);
         }
 
         public static float3 CartesianToSpherical(float3 cartesian)
@@ -96,7 +94,7 @@ namespace Calculations
             float3 squared = cartesian * cartesian;
             float r = Mathf.Sqrt(squared.x + squared.y + squared.z);
             float azimuth = Mathf.Atan2(cartesian.z, cartesian.x);
-            float elevation = Mathf.Asin(cartesian.y / r);
+            float elevation = Mathf.Acos(cartesian.y / r);
 
             return new(r, elevation, azimuth);
         }

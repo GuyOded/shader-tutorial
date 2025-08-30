@@ -1,9 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Xml.Serialization;
 using Calculations;
-using Unity.Burst;
-using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
 
