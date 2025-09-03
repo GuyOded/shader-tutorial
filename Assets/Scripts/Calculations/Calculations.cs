@@ -89,6 +89,25 @@ namespace Calculations
             return new float3(x, z, y);
         }
 
+        public static float3 Donut(float mainRadius, float secondaryRadius, float mainAzimuth, float secondaryAzimuth)
+        {
+            if (!InRange(mainAzimuth, Consts.AZIMUTHAL_RANGE))
+            {
+                throw new ArgumentException($"{mainAzimuth} not in range {Consts.AZIMUTHAL_RANGE}");
+            }
+
+            if (!InRange(mainAzimuth, Consts.AZIMUTHAL_RANGE))
+            {
+                throw new ArgumentException($"{secondaryAzimuth} not in range {Consts.AZIMUTHAL_RANGE}");
+            }
+
+            float x = mainRadius * Mathf.Cos(mainAzimuth) + secondaryRadius * Mathf.Cos(mainAzimuth) * Mathf.Cos(secondaryAzimuth);
+            float z = mainRadius * Mathf.Sin(mainAzimuth) + secondaryRadius * Mathf.Sin(mainAzimuth) * Mathf.Sin(secondaryAzimuth);
+            float y = secondaryRadius * Mathf.Sin(secondaryAzimuth);
+
+            return new(x, z, y);
+        }
+
         public static float3 CartesianToSpherical(float3 cartesian)
         {
             float3 squared = cartesian * cartesian;
