@@ -34,20 +34,30 @@ namespace Calculations
 
         public static float[] Linspace(float min, float max, int pointsCount)
         {
+            return LinspaceEnumerator(min, max, pointsCount).ToArray();
+        }
+
+        public static IEnumerable<float> LinspaceEnumerator(float min, float max, int pointsCount)
+        {
             if (min >= max)
             {
                 throw new ArgumentException($"min has to be smaller than max: ({min}, {max})");
             }
 
-            return Enumerable.Range(0, pointsCount).Select(index => min + (max - min) / pointsCount * index).ToArray();
+            return Enumerable.Range(0, pointsCount).Select(index => min + (max - min) / pointsCount * index);
         }
 
         public static float2[] Linspace2D(float xMin, float xMax, float yMin, float yMax, int length)
         {
+            return Linspace2DEnumerator(xMin, xMax, yMin, yMax, length).ToArray();
+        }
+
+        public static IEnumerable<float2> Linspace2DEnumerator(float xMin, float xMax, float yMin, float yMax, int length)
+        {
             IEnumerable<float> xRange = Enumerable.Range(0, length).Select(i => xMin + i * (xMax - xMin) / length);
             IEnumerable<float> yRange = Enumerable.Range(0, length).Select(i => yMin + i * (yMax - yMin) / length);
 
-            return xRange.SelectMany(y => yRange, (x, y) => new float2(x, y)).ToArray();
+            return xRange.SelectMany(y => yRange, (x, y) => new float2(x, y));
         }
 
         public static float TwoDimensionalRipple(float x, float y, float phase, float distanceClamp = .1f, float frequenecy = 1)

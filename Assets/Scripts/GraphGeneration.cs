@@ -131,10 +131,6 @@ public class GraphGeneration : MonoBehaviour
 
         float3 current3DSurfaceFunc(float azimuth, float elevation) => current3DSurface(azimuth, elevation, Time.time);
         Instantiate3DGraphPoints(range, current3DSurfaceFunc);
-        var min = graphPointArray.Min(gpe => gpe.GraphPoint.y);
-        var max = graphPointArray.Max(gpe => gpe.GraphPoint.y);
-
-        // Debug.Log($"Min y: {min}, Max y: {max}");
     }
 
     private void Instantiate3DGraphPoints(float2[] range, Func<float, float, float3> threeDGraphFunc)
