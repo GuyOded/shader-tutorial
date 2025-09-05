@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Calculations.Mappings
 {
-    class WirestrassMap : Mapping
+    class WirestrassMap : IMapping
     {
         private readonly float2 domain;
         private readonly float z;
@@ -22,7 +22,7 @@ namespace Calculations.Mappings
         }
     }
 
-    class BeatMap : Mapping
+    class BeatMap : IMapping
     {
         private readonly float2 domain;
         private readonly float z;
@@ -43,7 +43,7 @@ namespace Calculations.Mappings
         }
     }
 
-    class RippleMap : Mapping
+    class RippleMap : IMapping
     {
         private readonly float2 domain;
         private readonly float freq1;
@@ -59,15 +59,15 @@ namespace Calculations.Mappings
         public IEnumerable<float3> CalculatePoints(int pointsCount)
         {
             int perAxisLength = Mathf.RoundToInt(Mathf.Sqrt(pointsCount));
-            return MathematicalFunctions.Linspace2DEnumerator(domain.x, domain.y, domain.x, domain.y, pointsCount).Select((point) =>
+            return MathematicalFunctions.Linspace2DEnumerator(domain.x, domain.y, domain.x, domain.y, perAxisLength).Select((point) =>
             {
                 float value = MathematicalFunctions.TwoDimensionalRipple(point.x, point.y, Time.time, distanceClamp, freq1);
-                return new float3(point.x, point.y, value);
+                return new float3(point.x, value, point.y);
             });
         }
     }
 
-    class CirclingDecayingGaussiansMap : Mapping
+    class CirclingDecayingGaussiansMap : IMapping
     {
         private readonly float2 domain;
         private readonly float decayConstant;
@@ -81,15 +81,15 @@ namespace Calculations.Mappings
         public IEnumerable<float3> CalculatePoints(int pointsCount)
         {
             int perAxisLength = Mathf.RoundToInt(Mathf.Sqrt(pointsCount));
-            return MathematicalFunctions.Linspace2DEnumerator(domain.x, domain.y, domain.x, domain.y, pointsCount).Select(point =>
+            return MathematicalFunctions.Linspace2DEnumerator(domain.x, domain.y, domain.x, domain.y, perAxisLength).Select(point =>
             {
                 float value = MathematicalFunctions.CirclingDecayingGaussians(point.x, point.y, Time.time, decayConstant);
-                return new float3(point.x, point.y, value);
+                return new float3(point.x, value, point.y);
             });
         }
     }
 
-    class WavingSphereMap : Mapping
+    class WavingSphereMap : IMapping
     {
         private readonly float2 azimuthalDomain;
         private readonly float2 elevationDomain;

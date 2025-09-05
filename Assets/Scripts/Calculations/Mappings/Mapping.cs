@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using Unity.Mathematics;
 
-interface Mapping
+public interface IMapping
 {
     IEnumerable<float3> CalculatePoints(int pointsCount);
 }
