@@ -60,6 +60,14 @@ namespace Calculations
             return xRange.SelectMany(y => yRange, (x, y) => new float2(x, y));
         }
 
+        public static IEnumerable<float2> Linspace2DEnumerator(float xMin, float xMax, float yMin, float yMax, int xLength, int yLength)
+        {
+            IEnumerable<float> xRange = Enumerable.Range(0, xLength).Select(i => xMin + i * (xMax - xMin) / xLength);
+            IEnumerable<float> yRange = Enumerable.Range(0, yLength).Select(i => yMin + i * (yMax - yMin) / yLength);
+
+            return xRange.SelectMany(y => yRange, (x, y) => new float2(x, y));
+        }
+
         public static float TwoDimensionalRipple(float x, float y, float phase, float distanceClamp = .1f, float frequenecy = 1)
         {
             float distance = Mathf.Sqrt(x * x + y * y);
@@ -99,7 +107,7 @@ namespace Calculations
             return new float3(x, z, y);
         }
 
-        public static float3 Donut(float mainRadius, float secondaryRadius, float mainAzimuth, float secondaryAzimuth)
+        public static float3 Donut(float mainRadius, float secondaryRadius, float mainAzimuth, float secondaryAzimuth, float phase)
         {
             if (!InRange(mainAzimuth, Consts.AZIMUTHAL_RANGE))
             {
@@ -111,21 +119,11 @@ namespace Calculations
                 throw new ArgumentException($"{secondaryAzimuth} not in range {Consts.AZIMUTHAL_RANGE}");
             }
 
-            float x = mainRadius * Mathf.Cos(mainAzimuth) + secondaryRadius * Mathf.Cos(mainAzimuth) * Mathf.Cos(secondaryAzimuth);
-            float z = mainRadius * Mathf.Sin(mainAzimuth) + secondaryRadius * Mathf.Sin(mainAzimuth) * Mathf.Sin(secondaryAzimuth);
-            float y = secondaryRadius * Mathf.Sin(secondaryAzimuth);
+            float x = mainRadius * (0.8f + 0.5f * Mathf.Cos(phase)) * Mathf.Cos(mainAzimuth + phase) + secondaryRadius * Mathf.Cos(mainAzimuth + phase) * Mathf.Cos(secondaryAzimuth + phase);
+            float z = mainRadius * (0.8f + 0.5f * Mathf.Cos(phase)) * Mathf.Sin(mainAzimuth + phase) + secondaryRadius * Mathf.Sin(mainAzimuth + phase) * Mathf.Cos(secondaryAzimuth + phase);
+            float y = secondaryRadius * Mathf.Sin(secondaryAzimuth + phase);
 
-            return new(x, z, y);
-        }
-
-        public static float3 CartesianToSpherical(float3 cartesian)
-        {
-            float3 squared = cartesian * cartesian;
-            float r = Mathf.Sqrt(squared.x + squared.y + squared.z);
-            float azimuth = Mathf.Atan2(cartesian.z, cartesian.x);
-            float elevation = Mathf.Acos(cartesian.y / r);
-
-            return new(r, elevation, azimuth);
+            return new(x, y, z);
         }
 
         private static float Square2D(float2 vector)

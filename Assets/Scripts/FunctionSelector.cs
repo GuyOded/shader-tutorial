@@ -1,8 +1,5 @@
-using System;
 using System.Collections.Generic;
-using Calculations;
 using Calculations.Mappings;
-using Unity.Mathematics;
 using UnityEngine;
 
 public class FunctionSelector : MonoBehaviour
@@ -25,6 +22,7 @@ public class FunctionSelector : MonoBehaviour
         {FunctionEnumeration.Ripple, FunctionType.ThreeDScalar},
         {FunctionEnumeration.CirclingDecayingExponents, FunctionType.ThreeDScalar},
         {FunctionEnumeration.WavingSphere, FunctionType.ThreeDSurface},
+        {FunctionEnumeration.Donut, FunctionType.ThreeDSurface}
     };
 
     private FunctionEnumeration currentFunction = FunctionEnumeration.Weierstrass;
@@ -69,6 +67,7 @@ public class FunctionSelector : MonoBehaviour
             FunctionEnumeration.Ripple => new RippleMap(freq1),
             FunctionEnumeration.CirclingDecayingExponents => new CirclingDecayingGaussiansMap(3),
             FunctionEnumeration.WavingSphere => new WavingSphereMap(),
+            FunctionEnumeration.Donut => new DonutMap(),
             _ => new WirestrassMap()
         };
 
@@ -98,6 +97,7 @@ public class FunctionSelector : MonoBehaviour
         Ripple,
         CirclingDecayingExponents,
         WavingSphere,
+        Donut
     }
 }
 

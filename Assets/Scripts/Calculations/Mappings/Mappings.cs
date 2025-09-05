@@ -121,4 +121,29 @@ namespace Calculations.Mappings
             });
         }
     }
+
+    class DonutMap : IMapping
+    {
+        private readonly float primaryRadius;
+        private readonly float secondaryRadius;
+
+        public DonutMap(float primaryRadius = 2, float secondaryRadius = 0.5f)
+        {
+            this.primaryRadius = primaryRadius;
+            this.secondaryRadius = secondaryRadius;
+        }
+
+        public IEnumerable<float3> CalculatePoints(int pointsCount)
+        {
+            float countSqrt = Mathf.Sqrt(pointsCount);
+            int mainAxisLength = Mathf.RoundToInt(countSqrt);
+            int secondaryAxisLength = Mathf.RoundToInt(0.5f * countSqrt);
+
+            return MathematicalFunctions.Linspace2DEnumerator(Consts.AZIMUTHAL_RANGE.x,
+                    Consts.AZIMUTHAL_RANGE.y,
+                    Consts.AZIMUTHAL_RANGE.x,
+                    Consts.AZIMUTHAL_RANGE.y,
+                    mainAxisLength, secondaryAxisLength).Select(point => MathematicalFunctions.Donut(primaryRadius, secondaryRadius, point.x, point.y, Time.time));
+        }
+    }
 }
