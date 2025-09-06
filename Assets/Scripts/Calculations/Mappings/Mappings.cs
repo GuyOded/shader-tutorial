@@ -136,7 +136,7 @@ namespace Calculations.Mappings
         public IEnumerable<float3> CalculatePoints(int pointsCount)
         {
             float countSqrt = Mathf.Sqrt(pointsCount);
-            int mainAxisLength = Mathf.FloorToInt(2*countSqrt);
+            int mainAxisLength = Mathf.FloorToInt(2 * countSqrt);
             int secondaryAxisLength = Mathf.FloorToInt(0.5f * countSqrt);
 
             return MathematicalFunctions.Linspace2DEnumerator(Consts.AZIMUTHAL_RANGE.x,
@@ -144,6 +144,33 @@ namespace Calculations.Mappings
                     Consts.AZIMUTHAL_RANGE.x,
                     Consts.AZIMUTHAL_RANGE.y,
                     mainAxisLength, secondaryAxisLength).Select(point => MathematicalFunctions.Donut(primaryRadius, secondaryRadius, point.x, point.y, PhaseController.Phase));
+        }
+    }
+
+    class TwistedTorusMap : IMapping
+    {
+        private readonly float primaryRadius;
+        private readonly float secondaryRadius;
+        private readonly float frequency;
+
+        public TwistedTorusMap(float primaryRadius = 2, float secondaryRadius = 0.5f, float frequency = 2)
+        {
+            this.primaryRadius = primaryRadius;
+            this.secondaryRadius = secondaryRadius;
+            this.frequency = frequency;
+        }
+
+        public IEnumerable<float3> CalculatePoints(int pointsCount)
+        {
+            float countSqrt = Mathf.Sqrt(pointsCount);
+            int mainAxisLength = Mathf.FloorToInt(2 * countSqrt);
+            int secondaryAxisLength = Mathf.FloorToInt(0.5f * countSqrt);
+
+            return MathematicalFunctions.Linspace2DEnumerator(Consts.AZIMUTHAL_RANGE.x,
+                    Consts.AZIMUTHAL_RANGE.y,
+                    Consts.AZIMUTHAL_RANGE.x,
+                    Consts.AZIMUTHAL_RANGE.y,
+                    mainAxisLength, secondaryAxisLength).Select(point => MathematicalFunctions.TwistedTorus(primaryRadius, secondaryRadius, point.x, point.y, PhaseController.Phase, frequency));
         }
     }
 }

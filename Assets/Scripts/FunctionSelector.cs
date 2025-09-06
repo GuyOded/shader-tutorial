@@ -25,7 +25,8 @@ public class FunctionSelector : MonoBehaviour
         {FunctionEnumeration.Ripple, FunctionType.ThreeDScalar},
         {FunctionEnumeration.CirclingDecayingExponents, FunctionType.ThreeDScalar},
         {FunctionEnumeration.WavingSphere, FunctionType.ThreeDSurface},
-        {FunctionEnumeration.Donut, FunctionType.ThreeDSurface}
+        {FunctionEnumeration.Donut, FunctionType.ThreeDSurface},
+        {FunctionEnumeration.TwistedTorus, FunctionType.ThreeDSurface},
     };
 
     private FunctionEnumeration currentFunction = FunctionEnumeration.Weierstrass;
@@ -49,29 +50,23 @@ public class FunctionSelector : MonoBehaviour
             UpdateFunction();
         }
 
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.Space) && !inAnimation)
         {
 
             List<FunctionEnumeration> keysList = functionToTypeMap.Keys.ToList();
             int index = keysList.IndexOf(selectedFunction);
             int nextIndex = (index + 1) % functionToTypeMap.Keys.Count();
             FunctionEnumeration nextFunction = keysList[nextIndex];
-            IMapping nextMap = GetMapByType(nextFunction);
 
-            Sequence sequence = DOTween.Sequence();
-            inAnimation = true;
-            sequence.Append(graphGenerator.SetMappingWithAnimation(nextMap));
-            Transform viewPoint = GetCameraViewPointFromFunction(nextFunction);
+            TriggerFunctionTransition(nextFunction);
+        }
 
-            sequence.Join(mainCamera.transform.DOMove(viewPoint.position, Consts.ANIMATION_DURATION_SECONDS));
-            sequence.Join(mainCamera.transform.DORotateQuaternion(viewPoint.rotation, Consts.ANIMATION_DURATION_SECONDS));
+        if (Input.GetKeyDown(KeyCode.R) && !inAnimation)
+        {
+            FunctionEnumeration[] availableFunctions = functionToTypeMap.Keys.Where((functionEnum) => functionEnum != currentFunction).ToArray();
+            FunctionEnumeration nextFunction = availableFunctions[Random.Range(0, availableFunctions.Length)];
 
-            sequence.OnComplete(() =>
-            {
-                selectedFunction = nextFunction;
-                currentFunction = nextFunction;
-                inAnimation = false;
-            });
+            TriggerFunctionTransition(nextFunction);
         }
 
         if (currentFreq1 != freq1)
@@ -89,14 +84,35 @@ public class FunctionSelector : MonoBehaviour
 
     private void UpdateFunction()
     {
-        IMapping currentMap = GetMapByType(currentFunction);
+        IMapping currentMap = GetMapByFunction(currentFunction);
 
         graphGenerator.CurrentMap = currentMap;
     }
 
-    private IMapping GetMapByType(FunctionEnumeration functionType)
+    private void TriggerFunctionTransition(FunctionEnumeration nextFunction)
     {
-        return functionType switch
+        IMapping nextMap = GetMapByFunction(nextFunction);
+
+        Sequence sequence = DOTween.Sequence();
+        inAnimation = true;
+
+        sequence.Append(graphGenerator.SetMappingWithAnimation(nextMap));
+        Transform viewPoint = GetCameraViewPointFromFunction(nextFunction);
+
+        sequence.Join(mainCamera.transform.DOMove(viewPoint.position, Consts.ANIMATION_DURATION_SECONDS));
+        sequence.Join(mainCamera.transform.DORotateQuaternion(viewPoint.rotation, Consts.ANIMATION_DURATION_SECONDS));
+
+        sequence.OnComplete(() =>
+        {
+            selectedFunction = nextFunction;
+            currentFunction = nextFunction;
+            inAnimation = false;
+        });
+    }
+
+    private IMapping GetMapByFunction(FunctionEnumeration function)
+    {
+        return function switch
         {
             FunctionEnumeration.Weierstrass => new WirestrassMap(),
             FunctionEnumeration.Beat => new BeatMap(freq1, freq2),
@@ -104,6 +120,7 @@ public class FunctionSelector : MonoBehaviour
             FunctionEnumeration.CirclingDecayingExponents => new CirclingDecayingGaussiansMap(3),
             FunctionEnumeration.WavingSphere => new WavingSphereMap(),
             FunctionEnumeration.Donut => new DonutMap(),
+            FunctionEnumeration.TwistedTorus => new TwistedTorusMap(frequency: 5f),
             _ => new WirestrassMap()
         };
     }
@@ -129,7 +146,8 @@ public class FunctionSelector : MonoBehaviour
         Ripple,
         CirclingDecayingExponents,
         WavingSphere,
-        Donut
+        Donut,
+        TwistedTorus,
     }
 }
 

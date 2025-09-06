@@ -22,7 +22,9 @@ namespace Calculations
             float sum = 0;
             for (int i = 0; i < iterations; i++)
             {
-                sum += Mathf.Pow(a, i) * Mathf.Cos(Mathf.Pow(b, i) * Mathf.PI * x + phase);
+                float amplitude = Mathf.Pow(a, i);
+                float frequency = Mathf.Pow(b, i) * Mathf.PI;
+                sum += amplitude * Mathf.Cos(frequency * x + phase);
             }
 
             return sum;
@@ -30,7 +32,9 @@ namespace Calculations
 
         public static float Beat(float x, float f1, float f2, float phase)
         {
-            return 0.5f * (Mathf.Cos(2 * Mathf.PI * f1 * x + phase) + Mathf.Cos(2 * Mathf.PI * f2 * x + phase));
+            float wave1 = Mathf.Cos(2 * Mathf.PI * f1 * x + phase);
+            float wave2 = Mathf.Cos(2 * Mathf.PI * f2 * x + phase);
+            return 0.5f * (wave1 + wave2);
         }
 
         public static float[] Linspace(float min, float max, int pointsCount)
@@ -45,7 +49,8 @@ namespace Calculations
                 throw new ArgumentException($"min has to be smaller than max: ({min}, {max})");
             }
 
-            return Enumerable.Range(0, pointsCount).Select(index => min + (max - min) / pointsCount * index);
+            return Enumerable.Range(0, pointsCount)
+                .Select(index => min + (max - min) / pointsCount * index);
         }
 
         public static float2[] Linspace2D(float xMin, float xMax, float yMin, float yMax, int length)
@@ -55,21 +60,26 @@ namespace Calculations
 
         public static IEnumerable<float2> Linspace2DEnumerator(float xMin, float xMax, float yMin, float yMax, int length)
         {
-            IEnumerable<float> xRange = Enumerable.Range(0, length).Select(i => xMin + i * (xMax - xMin) / length);
-            IEnumerable<float> yRange = Enumerable.Range(0, length).Select(i => yMin + i * (yMax - yMin) / length);
+            IEnumerable<float> xRange = Enumerable.Range(0, length)
+                .Select(i => xMin + i * (xMax - xMin) / length);
+            IEnumerable<float> yRange = Enumerable.Range(0, length)
+                .Select(i => yMin + i * (yMax - yMin) / length);
 
             return xRange.SelectMany(y => yRange, (x, y) => new float2(x, y));
         }
 
         public static IEnumerable<float2> Linspace2DEnumerator(float xMin, float xMax, float yMin, float yMax, int xLength, int yLength)
         {
-            IEnumerable<float> xRange = Enumerable.Range(0, xLength).Select(i => xMin + i * (xMax - xMin) / xLength);
-            IEnumerable<float> yRange = Enumerable.Range(0, yLength).Select(i => yMin + i * (yMax - yMin) / yLength);
+            IEnumerable<float> xRange = Enumerable.Range(0, xLength)
+                .Select(i => xMin + i * (xMax - xMin) / xLength);
+            IEnumerable<float> yRange = Enumerable.Range(0, yLength)
+                .Select(i => yMin + i * (yMax - yMin) / yLength);
 
             return xRange.SelectMany(y => yRange, (x, y) => new float2(x, y));
         }
 
-        public static float TwoDimensionalRipple(float x, float y, float phase, float distanceClamp = .1f, float frequenecy = 1)
+        public static float TwoDimensionalRipple(float x, float y, float phase,
+            float distanceClamp = .1f, float frequenecy = 1)
         {
             float distance = Mathf.Sqrt(x * x + y * y);
             return Mathf.Sin(frequenecy * distance + phase) / (distance + distanceClamp);
@@ -87,7 +97,8 @@ namespace Calculations
             return Mathf.Exp(firstExponent) + Mathf.Exp(secondExponent);
         }
 
-        public static float3 WavingSphere(float azimuth, float elevation, float phase, float radius, float amplitude = .05f, float frequenecy = 10f)
+        public static float3 WavingSphere(float azimuth, float elevation, float phase,
+            float radius, float amplitude = .05f, float frequenecy = 10f)
         {
             if (!InRange(azimuth, Consts.AZIMUTHAL_RANGE))
             {
@@ -108,7 +119,8 @@ namespace Calculations
             return new float3(x, z, y);
         }
 
-        public static float3 Donut(float mainRadius, float secondaryRadius, float mainAzimuth, float secondaryAzimuth, float phase)
+        public static float3 Donut(float mainRadius, float secondaryRadius,
+            float mainAzimuth, float secondaryAzimuth, float phase)
         {
             if (!InRange(mainAzimuth, Consts.AZIMUTHAL_RANGE))
             {
@@ -120,9 +132,46 @@ namespace Calculations
                 throw new ArgumentException($"{secondaryAzimuth} not in range {Consts.AZIMUTHAL_RANGE}");
             }
 
-            float x = mainRadius * (0.8f + 0.5f * Mathf.Cos(phase)) * Mathf.Cos(mainAzimuth + phase) + secondaryRadius * Mathf.Cos(mainAzimuth + phase) * Mathf.Cos(secondaryAzimuth + phase);
-            float z = mainRadius * (0.8f + 0.5f * Mathf.Cos(phase)) * Mathf.Sin(mainAzimuth + phase) + secondaryRadius * Mathf.Sin(mainAzimuth + phase) * Mathf.Cos(secondaryAzimuth + phase);
+            float mainComponent = mainRadius * (0.8f + 0.5f * Mathf.Cos(phase));
+            float x = mainComponent * Mathf.Cos(mainAzimuth + phase) +
+                      secondaryRadius * Mathf.Cos(mainAzimuth + phase) * Mathf.Cos(secondaryAzimuth + phase);
+            float z = mainComponent * Mathf.Sin(mainAzimuth + phase) +
+                      secondaryRadius * Mathf.Sin(mainAzimuth + phase) * Mathf.Cos(secondaryAzimuth + phase);
             float y = secondaryRadius * Mathf.Sin(secondaryAzimuth + phase);
+
+            return new(x, y, z);
+        }
+
+        public static float3 TwistedTorus(float mainRadius, float secondaryRadius,
+            float mainAzimuth, float secondaryAzimuth, float phase, float frequency)
+        {
+            if (!InRange(mainAzimuth, Consts.AZIMUTHAL_RANGE))
+            {
+                throw new ArgumentException($"{mainAzimuth} not in range {Consts.AZIMUTHAL_RANGE}");
+            }
+
+            if (!InRange(mainAzimuth, Consts.AZIMUTHAL_RANGE))
+            {
+                throw new ArgumentException($"{secondaryAzimuth} not in range {Consts.AZIMUTHAL_RANGE}");
+            }
+
+            const float SHIFT_COEFFICIENT = 0.167f;
+            const float SECONDARY_RADIUS_COEFFICIENT = 0.15f;
+            const float SECONDARY_RADIUS_SHIFT_FREQUENCY = 4;
+
+            float mainRadiusComponent = mainRadius + SHIFT_COEFFICIENT * mainRadius *
+                                         Mathf.Cos(frequency * mainAzimuth + phase);
+            float secondaryRadiusComponent = secondaryRadius + SECONDARY_RADIUS_COEFFICIENT *
+                                             Mathf.Cos(SECONDARY_RADIUS_SHIFT_FREQUENCY * secondaryAzimuth);
+
+            float x = mainRadiusComponent * Mathf.Cos(mainAzimuth) +
+                      secondaryRadiusComponent * Mathf.Cos(mainAzimuth) *
+                      Mathf.Cos(secondaryAzimuth + phase + 4 * mainAzimuth);
+            float z = mainRadiusComponent * Mathf.Sin(mainAzimuth) +
+                      secondaryRadiusComponent * Mathf.Sin(mainAzimuth) *
+                      Mathf.Cos(secondaryAzimuth + phase + 4 * mainAzimuth);
+            float y = secondaryRadiusComponent * Mathf.Sin(secondaryAzimuth + phase + 4 * mainAzimuth) +
+                      SHIFT_COEFFICIENT * mainRadius * Mathf.Sin(frequency * mainAzimuth + phase);
 
             return new(x, y, z);
         }
