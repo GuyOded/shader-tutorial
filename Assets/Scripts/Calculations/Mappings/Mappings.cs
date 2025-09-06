@@ -18,7 +18,7 @@ namespace Calculations.Mappings
 
         public IEnumerable<float3> CalculatePoints(int pointsCount)
         {
-            return MathematicalFunctions.LinspaceEnumerator(domain.x, domain.y, pointsCount).Select(point => new float3(point, MathematicalFunctions.Weierstrass(point, phase: Time.time), z));
+            return MathematicalFunctions.LinspaceEnumerator(domain.x, domain.y, pointsCount).Select(point => new float3(point, MathematicalFunctions.Weierstrass(point, phase: PhaseController.Phase), z));
         }
     }
 
@@ -39,7 +39,7 @@ namespace Calculations.Mappings
 
         public IEnumerable<float3> CalculatePoints(int pointsCount)
         {
-            return MathematicalFunctions.LinspaceEnumerator(domain.x, domain.y, pointsCount).Select(point => new float3(point, MathematicalFunctions.Beat(point, freq1, freq2, Time.time), z));
+            return MathematicalFunctions.LinspaceEnumerator(domain.x, domain.y, pointsCount).Select(point => new float3(point, MathematicalFunctions.Beat(point, freq1, freq2, PhaseController.Phase), z));
         }
     }
 
@@ -61,7 +61,7 @@ namespace Calculations.Mappings
             int perAxisLength = Mathf.FloorToInt(Mathf.Sqrt(pointsCount));
             return MathematicalFunctions.Linspace2DEnumerator(domain.x, domain.y, domain.x, domain.y, perAxisLength).Select((point) =>
             {
-                float value = MathematicalFunctions.TwoDimensionalRipple(point.x, point.y, Time.time, distanceClamp, freq1);
+                float value = MathematicalFunctions.TwoDimensionalRipple(point.x, point.y, PhaseController.Phase, distanceClamp, freq1);
                 return new float3(point.x, value, point.y);
             });
         }
@@ -83,7 +83,7 @@ namespace Calculations.Mappings
             int perAxisLength = Mathf.FloorToInt(Mathf.Sqrt(pointsCount));
             return MathematicalFunctions.Linspace2DEnumerator(domain.x, domain.y, domain.x, domain.y, perAxisLength).Select(point =>
             {
-                float value = MathematicalFunctions.CirclingDecayingGaussians(point.x, point.y, Time.time, decayConstant);
+                float value = MathematicalFunctions.CirclingDecayingGaussians(point.x, point.y, PhaseController.Phase, decayConstant);
                 return new float3(point.x, value, point.y);
             });
         }
@@ -117,7 +117,7 @@ namespace Calculations.Mappings
             {
                 float azimuth = point.x;
                 float elevation = point.y;
-                return MathematicalFunctions.WavingSphere(azimuth, elevation, Time.time, radius);
+                return MathematicalFunctions.WavingSphere(azimuth, elevation, PhaseController.Phase, radius);
             });
         }
     }
@@ -143,7 +143,7 @@ namespace Calculations.Mappings
                     Consts.AZIMUTHAL_RANGE.y,
                     Consts.AZIMUTHAL_RANGE.x,
                     Consts.AZIMUTHAL_RANGE.y,
-                    mainAxisLength, secondaryAxisLength).Select(point => MathematicalFunctions.Donut(primaryRadius, secondaryRadius, point.x, point.y, Time.time));
+                    mainAxisLength, secondaryAxisLength).Select(point => MathematicalFunctions.Donut(primaryRadius, secondaryRadius, point.x, point.y, PhaseController.Phase));
         }
     }
 }
