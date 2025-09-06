@@ -136,7 +136,7 @@ namespace Calculations.Mappings
         public IEnumerable<float3> CalculatePoints(int pointsCount)
         {
             float countSqrt = Mathf.Sqrt(pointsCount);
-            int mainAxisLength = Mathf.RoundToInt(countSqrt);
+            int mainAxisLength = Mathf.RoundToInt(2*countSqrt);
             int secondaryAxisLength = Mathf.RoundToInt(0.5f * countSqrt);
 
             return MathematicalFunctions.Linspace2DEnumerator(Consts.AZIMUTHAL_RANGE.x,

@@ -533,7 +533,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e57df20ae1da34142b2f03ced8e4b56d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  resolution: 800
+  resolution: 1500
   parent: {fileID: 0}
   pointPrefab: {fileID: 7723781802180304425, guid: b7f03baa38129404ea9f305ae843521b, type: 3}
   scale: 0.1

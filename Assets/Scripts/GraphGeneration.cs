@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Calculations;
 using Calculations.Mappings;
+using DG.Tweening;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -17,9 +19,7 @@ public class GraphGeneration : MonoBehaviour
     [SerializeField] private float scale = 0.1f;
 
     private List<GameObject> graphPointArray;
-    private bool functionTypeChanged = false;
-    private int lastResolution = 0;
-
+    private bool inTransition;
     private IMapping currentMap = new WirestrassMap();
 
     public IMapping CurrentMap { get => currentMap; set => currentMap = value; }
@@ -35,7 +35,8 @@ public class GraphGeneration : MonoBehaviour
 
     private void Update()
     {
-        InstantiateGraphPoints();
+        if (!inTransition)
+            InstantiateGraphPoints();
 
         if (graphPointArray.Count > 0 && graphPointArray.First().transform.localScale.x != scale)
         {
@@ -43,11 +44,31 @@ public class GraphGeneration : MonoBehaviour
         }
     }
 
+    public Tween SetMappingWithAnimation(IMapping newMap)
+    {
+        float progress = 0f;
+        inTransition = true;
+        int currentMapCount = currentMap.CalculatePoints(resolution).Count();
+        return DOTween.To(() => progress, x => progress = x, 1f, Consts.ANIMATION_DURATION_SECONDS).OnUpdate(() =>
+        {
+            float3[] destPoints = newMap.CalculatePoints(resolution).ToArray();
+            foreach (var (calculatedPoint, graphPoint) in Enumerable.Range(0, currentMapCount).Select(i => (destPoints[i % destPoints.Length], graphPointArray[i % currentMapCount])))
+            {
+                Vector3 calculatedPointAsVector = new(calculatedPoint.x, calculatedPoint.y, calculatedPoint.z);
+                graphPoint.transform.position = Vector3.Lerp(graphPoint.transform.position, calculatedPointAsVector, progress);
+            }
+        }).OnComplete(() =>
+        {
+            CurrentMap = newMap;
+            inTransition = false;
+        });
+    }
+
     private void InstantiateGraphPoints()
     {
         foreach ((float3 calculateGraphPoint, GameObject pointGameObject) in currentMap.CalculatePoints(resolution).Zip(graphPointArray, (calculatedPoint, graphPoint) => (calculatedPoint, graphPoint)))
         {
-            pointGameObject.transform.localPosition = new(calculateGraphPoint.x, calculateGraphPoint.y, calculateGraphPoint.z);
+            pointGameObject.transform.position = new(calculateGraphPoint.x, calculateGraphPoint.y, calculateGraphPoint.z);
             pointGameObject.SetActive(true);
         }
 
@@ -57,7 +78,7 @@ public class GraphGeneration : MonoBehaviour
             {
                 Vector3 visualPointPosition = new(calculatedGraphPoint.x, calculatedGraphPoint.z, calculatedGraphPoint.y);
                 GameObject newVisualPoint = Instantiate(pointPrefab, parent);
-                newVisualPoint.transform.localPosition = visualPointPosition;
+                newVisualPoint.transform.position = visualPointPosition;
                 newVisualPoint.transform.localScale = Vector3.one * scale;
                 graphPointArray.Add(newVisualPoint);
             }

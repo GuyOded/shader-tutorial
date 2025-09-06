@@ -11,7 +11,8 @@ namespace Calculations
         public static readonly float2 DEFAULT_RANGE = new(-2, 2);
         public static readonly float2 AZIMUTHAL_RANGE = new(-Mathf.PI, Mathf.PI);
         public static readonly float2 ELEVATION_RANGE = new(0, Mathf.PI);
-        public static readonly float DEFAULT_SPHERE_RADIUS = 2;
+        public const float DEFAULT_SPHERE_RADIUS = 2;
+        public const float ANIMATION_DURATION_SECONDS = 1;
     }
 
     public static class MathematicalFunctions
