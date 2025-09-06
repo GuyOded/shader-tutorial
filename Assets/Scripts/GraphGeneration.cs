@@ -48,11 +48,26 @@ public class GraphGeneration : MonoBehaviour
     {
         float progress = 0f;
         inTransition = true;
+
         int currentMapCount = currentMap.CalculatePoints(resolution).Count();
+        int nextMapCount = newMap.CalculatePoints(resolution).Count();
+        if (currentMapCount < nextMapCount)
+        {
+            foreach (var (endGraphPoint, startGraphPoint) in
+                graphPointArray.Skip(currentMapCount)
+                               .Take(nextMapCount - currentMapCount)
+                               .Zip(graphPointArray, (endGraphPoint, startGraphPoint) => (endGraphPoint, startGraphPoint)))
+            {
+                endGraphPoint.transform.position = startGraphPoint.transform.position;
+                endGraphPoint.transform.localScale = startGraphPoint.transform.localScale;
+                endGraphPoint.SetActive(true);
+            }
+        }
+
         return DOTween.To(() => progress, x => progress = x, 1f, Consts.ANIMATION_DURATION_SECONDS).OnUpdate(() =>
         {
             float3[] destPoints = newMap.CalculatePoints(resolution).ToArray();
-            foreach (var (calculatedPoint, graphPoint) in Enumerable.Range(0, currentMapCount).Select(i => (destPoints[i % destPoints.Length], graphPointArray[i % currentMapCount])))
+            foreach (var (calculatedPoint, graphPoint) in Enumerable.Range(0, Mathf.Max(destPoints.Length, currentMapCount)).Select(i => (destPoints[i % destPoints.Length], graphPointArray[i])))
             {
                 Vector3 calculatedPointAsVector = new(calculatedPoint.x, calculatedPoint.y, calculatedPoint.z);
                 graphPoint.transform.position = Vector3.Lerp(graphPoint.transform.position, calculatedPointAsVector, progress);

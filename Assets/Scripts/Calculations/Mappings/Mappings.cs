@@ -58,7 +58,7 @@ namespace Calculations.Mappings
 
         public IEnumerable<float3> CalculatePoints(int pointsCount)
         {
-            int perAxisLength = Mathf.RoundToInt(Mathf.Sqrt(pointsCount));
+            int perAxisLength = Mathf.FloorToInt(Mathf.Sqrt(pointsCount));
             return MathematicalFunctions.Linspace2DEnumerator(domain.x, domain.y, domain.x, domain.y, perAxisLength).Select((point) =>
             {
                 float value = MathematicalFunctions.TwoDimensionalRipple(point.x, point.y, Time.time, distanceClamp, freq1);
@@ -80,7 +80,7 @@ namespace Calculations.Mappings
 
         public IEnumerable<float3> CalculatePoints(int pointsCount)
         {
-            int perAxisLength = Mathf.RoundToInt(Mathf.Sqrt(pointsCount));
+            int perAxisLength = Mathf.FloorToInt(Mathf.Sqrt(pointsCount));
             return MathematicalFunctions.Linspace2DEnumerator(domain.x, domain.y, domain.x, domain.y, perAxisLength).Select(point =>
             {
                 float value = MathematicalFunctions.CirclingDecayingGaussians(point.x, point.y, Time.time, decayConstant);
@@ -108,7 +108,7 @@ namespace Calculations.Mappings
 
         public IEnumerable<float3> CalculatePoints(int pointsCount)
         {
-            int perAxisLength = Mathf.RoundToInt(Mathf.Sqrt(pointsCount));
+            int perAxisLength = Mathf.FloorToInt(Mathf.Sqrt(pointsCount));
             return MathematicalFunctions.Linspace2DEnumerator(
                 azimuthalDomain.x, azimuthalDomain.y,
                 elevationDomain.x, elevationDomain.y,
@@ -136,8 +136,8 @@ namespace Calculations.Mappings
         public IEnumerable<float3> CalculatePoints(int pointsCount)
         {
             float countSqrt = Mathf.Sqrt(pointsCount);
-            int mainAxisLength = Mathf.RoundToInt(2*countSqrt);
-            int secondaryAxisLength = Mathf.RoundToInt(0.5f * countSqrt);
+            int mainAxisLength = Mathf.FloorToInt(2*countSqrt);
+            int secondaryAxisLength = Mathf.FloorToInt(0.5f * countSqrt);
 
             return MathematicalFunctions.Linspace2DEnumerator(Consts.AZIMUTHAL_RANGE.x,
                     Consts.AZIMUTHAL_RANGE.y,
